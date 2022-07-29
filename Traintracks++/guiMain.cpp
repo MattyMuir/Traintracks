@@ -9,7 +9,7 @@ wxEND_EVENT_TABLE()
 
 guiMain::guiMain() : wxMDIParentFrame(nullptr, wxID_ANY, "Traintracks Solver", wxPoint(30, 30), wxSize(800, 600))
 {
-	main = cMain();
+	main = Main();
 	m_MenuBar = new wxMenuBar();
 
 	this->SetMenuBar(m_MenuBar);
@@ -22,7 +22,7 @@ guiMain::guiMain() : wxMDIParentFrame(nullptr, wxID_ANY, "Traintracks Solver", w
 
 	m_MenuBar->Append(menuFile, "File");
 
-	m_Canvas = new cCanvas(this, &main.board, &main.colLabels, &main.rowLabels, &main.gridW, &main.gridH);
+	m_Canvas = new Canvas(this, &main.board, &main.colLabels, &main.rowLabels, &main.gridW, &main.gridH);
 	m_Canvas->mainPtr = &main;
 
 	wxAcceleratorEntry entries[4];

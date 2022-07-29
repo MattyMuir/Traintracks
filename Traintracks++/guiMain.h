@@ -1,7 +1,7 @@
 #pragma once
 #include <wx/wx.h>
-#include "cCanvas.h"
-#include "cMain.h"
+#include "Canvas.h"
+#include "Main.h"
 
 class guiMain : public wxMDIParentFrame
 {
@@ -10,7 +10,7 @@ public:
 	~guiMain();
 
 private:
-	cMain main;
+	Main main;
 	wxMenuBar* m_MenuBar = nullptr;
 
 	void OnMenuNew(wxCommandEvent& evt);
@@ -19,7 +19,7 @@ private:
 	void OnMenuSave(wxCommandEvent& evt);
 	void OnMenuExit(wxCommandEvent& evt);
 
-	cCanvas* m_Canvas = nullptr;
+	Canvas* m_Canvas = nullptr;
 	wxDialog* dlg = nullptr;
 	wxSizer* dlgSzr = nullptr;
 	wxButton* dlgBtn = nullptr;

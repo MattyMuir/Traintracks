@@ -1,7 +1,7 @@
-#include "cCanvas.h"
+#include "Canvas.h"
 
-wxBEGIN_EVENT_TABLE(cCanvas, wxWindow)
-	EVT_PAINT(cCanvas::OnPaint)
+wxBEGIN_EVENT_TABLE(Canvas, wxWindow)
+	EVT_PAINT(Canvas::OnPaint)
 	EVT_SIZE(m_Refresh)
 	EVT_LEFT_DOWN(MouseDown)
 	EVT_RIGHT_DOWN(MouseDownRight)
@@ -11,7 +11,7 @@ wxBEGIN_EVENT_TABLE(cCanvas, wxWindow)
 	EVT_KEY_DOWN(OnButtonPressed)
 wxEND_EVENT_TABLE()
 
-cCanvas::cCanvas(wxWindow* parent,
+Canvas::Canvas(wxWindow* parent,
 	std::vector<std::vector<Cell>>* boardPtr_,
 				std::vector<int>* colLabelsPtr_,
 				std::vector<int>* rowLabelsPtr_,
@@ -28,46 +28,46 @@ cCanvas::cCanvas(wxWindow* parent,
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
 
-cCanvas::~cCanvas()
+Canvas::~Canvas()
 {
 
 }
 
-void cCanvas::m_Refresh(wxSizeEvent& evt)
-{
-	this->Refresh();
-}
-
-void cCanvas::m_Refresh()
+void Canvas::m_Refresh(wxSizeEvent& evt)
 {
 	this->Refresh();
 }
 
-void cCanvas::SetCanvasDimension(int* gridWPtr_, int* gridHPtr_)
+void Canvas::m_Refresh()
+{
+	this->Refresh();
+}
+
+void Canvas::SetCanvasDimension(int* gridWPtr_, int* gridHPtr_)
 {
 	gridWPtr = gridWPtr_;
 	gridHPtr = gridHPtr_;
 }
 
-void cCanvas::SetBoard(std::vector<std::vector<Cell>>* boardPtr_)
+void Canvas::SetBoard(std::vector<std::vector<Cell>>* boardPtr_)
 {
 	boardPtr = boardPtr_;
 }
 
-void cCanvas::SetLabels(std::vector<int>* colLabelsPtr_, std::vector<int>* rowLabelsPtr_)
+void Canvas::SetLabels(std::vector<int>* colLabelsPtr_, std::vector<int>* rowLabelsPtr_)
 {
 	colLabelsPtr = colLabelsPtr_;
 	rowLabelsPtr = rowLabelsPtr_;
 }
 
-void cCanvas::OnDraw(wxDC& dc)
+void Canvas::OnDraw(wxDC& dc)
 {
 	dc.Clear();
 	DrawGrid(dc);
 	DrawCells(dc);
 	DrawLabels(dc);}
 
-void cCanvas::OnPaint(wxPaintEvent& evt)
+void Canvas::OnPaint(wxPaintEvent& evt)
 {
 	wxBufferedPaintDC dc(this);
 	auto parent = this->GetParent();
@@ -81,7 +81,7 @@ void cCanvas::OnPaint(wxPaintEvent& evt)
 	this->OnDraw(dc);
 }
 
-void cCanvas::SetCellWidth()
+void Canvas::SetCellWidth()
 {
 	cellW = (float)screenW / (*gridWPtr + 1);
 	cellH = (float)screenH / (*gridHPtr + 1);
@@ -96,7 +96,7 @@ void cCanvas::SetCellWidth()
 	}
 }
 
-std::vector<std::string> cCanvas::Split(std::string str, char delim)
+std::vector<std::string> Canvas::Split(std::string str, char delim)
 {
 	std::vector<std::string> splitStr;
 	std::istringstream stream(str);
@@ -109,7 +109,7 @@ std::vector<std::string> cCanvas::Split(std::string str, char delim)
 	return splitStr;
 }
 
-std::vector<int> cCanvas::StrVecToInt(std::vector<std::string> strVec)
+std::vector<int> Canvas::StrVecToInt(std::vector<std::string> strVec)
 {
 	std::vector<int> result;
 	for (std::string s : strVec)
@@ -119,7 +119,7 @@ std::vector<int> cCanvas::StrVecToInt(std::vector<std::string> strVec)
 	return result;
 }
 
-void cCanvas::SetRailByIndex(Vector2D pos, int railIndex, bool remove_)
+void Canvas::SetRailByIndex(Vector2D pos, int railIndex, bool remove_)
 {
 	(*boardPtr)[pos.y][pos.x].cellType = CellType::RAIL;
 	if (remove_)
@@ -160,7 +160,7 @@ void cCanvas::SetRailByIndex(Vector2D pos, int railIndex, bool remove_)
 	}
 }
 
-int cCanvas::GetRailIndex(Cell cell)
+int Canvas::GetRailIndex(Cell cell)
 {
 	if (cell.tracks["right"] == State::GIVEN && cell.tracks["left"] == State::GIVEN)
 	{
@@ -189,7 +189,7 @@ int cCanvas::GetRailIndex(Cell cell)
 	return 9;
 }
 
-void cCanvas::Open(std::string filename)
+void Canvas::Open(std::string filename)
 {
 	std::ifstream read(filename);
 	std::string line;
@@ -225,7 +225,7 @@ void cCanvas::Open(std::string filename)
 	this->Refresh();
 }
 
-void cCanvas::Save(std::string filename)
+void Canvas::Save(std::string filename)
 {
 	std::ofstream write(filename);
 	write << (*gridWPtr) << "," << (*gridHPtr) << "\n";
@@ -249,7 +249,7 @@ void cCanvas::Save(std::string filename)
 	write.close();
 }
 
-void cCanvas::SetColour(wxPen& pen, State state)
+void Canvas::SetColour(wxPen& pen, State state)
 {
 	pen.SetStyle(wxPENSTYLE_SOLID);
 	switch (state)
@@ -270,7 +270,7 @@ void cCanvas::SetColour(wxPen& pen, State state)
 	}
 }
 
-void cCanvas::DrawGrid(wxDC& dc)
+void Canvas::DrawGrid(wxDC& dc)
 {
 	wxBrush brush = dc.GetBrush();
 	wxPen pen = dc.GetPen();
@@ -301,7 +301,7 @@ void cCanvas::DrawGrid(wxDC& dc)
 	}
 }
 
-Vector2D cCanvas::CellToScreen(Vector2D pos)
+Vector2D Canvas::CellToScreen(Vector2D pos)
 {
 	Vector2D screen = Vector2D();
 	screen.x = pos.x * cellW + 1;
@@ -309,7 +309,7 @@ Vector2D cCanvas::CellToScreen(Vector2D pos)
 	return screen;
 }
 
-Vector2D cCanvas::ScreenToCell(Vector2D screen)
+Vector2D Canvas::ScreenToCell(Vector2D screen)
 {
 	Vector2D pos = Vector2D();
 	pos.y = floor((float)(screen.y - (screenH - cellH * (*gridHPtr))) / cellH);
@@ -318,7 +318,7 @@ Vector2D cCanvas::ScreenToCell(Vector2D screen)
 	return pos;
 }
 
-void cCanvas::DrawCells(wxDC& dc)
+void Canvas::DrawCells(wxDC& dc)
 {
 	//Create reference for readability
 	std::vector<std::vector<Cell>>& board = *boardPtr;
@@ -372,7 +372,7 @@ void cCanvas::DrawCells(wxDC& dc)
 	}
 }
 
-void cCanvas::DrawLabels(wxDC& dc)
+void Canvas::DrawLabels(wxDC& dc)
 {
 	wxFont font = wxFont(0.5 * cellW, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_EXTRALIGHT);
 	dc.SetFont(font);
@@ -413,7 +413,7 @@ void cCanvas::DrawLabels(wxDC& dc)
 	}
 }
 
-void cCanvas::MouseDown(wxMouseEvent& evt)
+void Canvas::MouseDown(wxMouseEvent& evt)
 {
 	remove = false;
 	clickPosX = evt.GetX();
@@ -427,7 +427,7 @@ void cCanvas::MouseDown(wxMouseEvent& evt)
 	evt.Skip();
 }
 
-void cCanvas::MouseDownRight(wxMouseEvent& evt)
+void Canvas::MouseDownRight(wxMouseEvent& evt)
 {
 	clickPosX = evt.GetX();
 	clickPosY = evt.GetY();
@@ -440,18 +440,18 @@ void cCanvas::MouseDownRight(wxMouseEvent& evt)
 	evt.Skip();
 }
 
-void cCanvas::MouseUp(wxMouseEvent& evt)
+void Canvas::MouseUp(wxMouseEvent& evt)
 {
 	evt.Skip();
 }
 
-void cCanvas::MouseUpRight(wxMouseEvent& evt)
+void Canvas::MouseUpRight(wxMouseEvent& evt)
 {
 	remove = false;
 	evt.Skip();
 }
 
-void cCanvas::MouseMoved(wxMouseEvent& evt)
+void Canvas::MouseMoved(wxMouseEvent& evt)
 {
 	if (wxGetMouseState().LeftIsDown() || wxGetMouseState().RightIsDown())
 	{
@@ -464,7 +464,7 @@ void cCanvas::MouseMoved(wxMouseEvent& evt)
 	evt.Skip();
 }
 
-void cCanvas::PlaceRail(Vector2D screen)
+void Canvas::PlaceRail(Vector2D screen)
 {
 	Vector2D pos = ScreenToCell(screen);
 
@@ -477,7 +477,7 @@ void cCanvas::PlaceRail(Vector2D screen)
 	}
 }
 
-void cCanvas::OnButtonPressed(wxKeyEvent& evt)
+void Canvas::OnButtonPressed(wxKeyEvent& evt)
 {
 	int enterModeBackup = enterMode;
 	char c = evt.GetUnicodeKey();

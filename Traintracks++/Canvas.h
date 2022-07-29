@@ -1,7 +1,7 @@
 #pragma once
 #include <wx/wx.h>
 #include "tracks.h"
-#include "cMain.h"
+#include "Main.h"
 
 #include "wx/dcclient.h"
 #include "wx/dcmemory.h"
@@ -17,12 +17,12 @@
 	(*boardPtr)[pos.y][pos.x].tracks["right"] = right; \
 	(*boardPtr)[pos.y][pos.x].tracks["left"] = left
 
-class cCanvas : wxWindow
+class Canvas : wxWindow
 {
 public:
-	cCanvas(wxWindow* parent, 
+	Canvas(wxWindow* parent, 
 		std::vector<std::vector<Cell>>* boardPtr_, std::vector<int>* colLabelsPtr_, std::vector<int>* rowLabelsPtr_, int* gridWPtr_, int* gridHPtr_);
-	~cCanvas();
+	~Canvas();
 	void m_Refresh(wxSizeEvent& evt);
 	void m_Refresh();
 	void SetCanvasDimension(int* gridWPtr_, int* gridHPtr_);
@@ -32,7 +32,7 @@ public:
 	void Open(std::string filename);
 	void Save(std::string filename);
 
-	cMain* mainPtr;
+	Main* mainPtr;
 
 private:
 	int clickPosX, clickPosY;

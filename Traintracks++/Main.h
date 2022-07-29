@@ -5,10 +5,10 @@
 #include <iostream>
 #include <fstream>
 
-class cMain
+class Main
 {
 public:
-	cMain();
+	Main();
 	void NewBoard();
 	void NewLabels();
 

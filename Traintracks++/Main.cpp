@@ -1,6 +1,6 @@
-#include "cMain.h"
+#include "Main.h"
 
-cMain::cMain()
+Main::Main()
 {
 	cout = std::ofstream("C:\\Users\\matty\\Desktop\\railslog.txt");
 
@@ -14,7 +14,7 @@ cMain::cMain()
 	display = true;
 }
 
-void cMain::NewBoard()
+void Main::NewBoard()
 {
 	board.clear();
 	for (int y = 0; y < gridH; y++)
@@ -27,7 +27,7 @@ void cMain::NewBoard()
 	}
 }
 
-void cMain::NewLabels()
+void Main::NewLabels()
 {
 	colLabels.clear();
 	rowLabels.clear();
@@ -41,7 +41,7 @@ void cMain::NewLabels()
 	}
 }
 
-bool cMain::Iterate()
+bool Main::Iterate()
 {
 	bool done = false;
 
@@ -58,7 +58,7 @@ bool cMain::Iterate()
 	return done;
 }
 
-void cMain::Solve()
+void Main::Solve()
 {
 	cout << "hey";
 	bool done = false;
@@ -70,7 +70,7 @@ void cMain::Solve()
 	}
 }
 
-std::string cMain::GetOppositeDir(std::string dir)
+std::string Main::GetOppositeDir(std::string dir)
 {
 	if (dir == "up") { return "down"; }
 	if (dir == "down") { return "up"; }
@@ -79,7 +79,7 @@ std::string cMain::GetOppositeDir(std::string dir)
 	throw;
 }
 
-bool cMain::NextTo(std::string& dir, Vector2D first, Vector2D second)
+bool Main::NextTo(std::string& dir, Vector2D first, Vector2D second)
 {
 	bool nextTo = false;
 	if (first.x - second.x == 1 && first.y == second.y) { dir = "left"; nextTo = true; }
@@ -90,7 +90,7 @@ bool cMain::NextTo(std::string& dir, Vector2D first, Vector2D second)
 	return nextTo;
 }
 
-Vector2D cMain::DirVal(std::string dir)
+Vector2D Main::DirVal(std::string dir)
 {
 	if (dir == "up") { return Vector2D(0, -1); }
 	if (dir == "down") { return Vector2D(0, 1); }
@@ -99,7 +99,7 @@ Vector2D cMain::DirVal(std::string dir)
 	throw;
 }
 
-bool cMain::SetType(Vector2D pos, CellType newType)
+bool Main::SetType(Vector2D pos, CellType newType)
 {
 	bool applicable = false;
 	if (InsideGrid(pos))
@@ -138,7 +138,7 @@ bool cMain::SetType(Vector2D pos, CellType newType)
 	return applicable;
 }
 
-bool cMain::SetTrack(Vector2D pos, std::string dir, State newState)
+bool Main::SetTrack(Vector2D pos, std::string dir, State newState)
 {
 	bool applicable = false;
 	if (InsideGrid(pos))
@@ -171,7 +171,7 @@ bool cMain::SetTrack(Vector2D pos, std::string dir, State newState)
 	return applicable;
 }
 
-CellType cMain::ReadType(Vector2D pos)
+CellType Main::ReadType(Vector2D pos)
 {
 	if (InsideGrid(pos))
 	{
@@ -180,7 +180,7 @@ CellType cMain::ReadType(Vector2D pos)
 	return CellType::BLOCKED;
 }
 
-State cMain::ReadTrack(Vector2D pos, std::string dir)
+State Main::ReadTrack(Vector2D pos, std::string dir)
 {
 	if (InsideGrid(pos))
 	{
@@ -189,7 +189,7 @@ State cMain::ReadTrack(Vector2D pos, std::string dir)
 	return State::IMPOSSIBLE;
 }
 
-int cMain::StateCount(Vector2D pos, State s1, State s2)
+int Main::StateCount(Vector2D pos, State s1, State s2)
 {
 	int count = 0;
 	std::unordered_map<std::string, State>::iterator it;
@@ -203,7 +203,7 @@ int cMain::StateCount(Vector2D pos, State s1, State s2)
 	return count;
 }
 
-bool cMain::BBlockedTrack()
+bool Main::BBlockedTrack()
 {
 	bool applicable = false;
 	bool setTrack;
@@ -227,7 +227,7 @@ bool cMain::BBlockedTrack()
 	return applicable;
 }
 
-bool cMain::PRailHead()
+bool Main::PRailHead()
 {
 	bool applicable = false;
 	bool setType, setTrack;
@@ -257,7 +257,7 @@ bool cMain::PRailHead()
 	return applicable;
 }
 
-bool cMain::BFullRow()
+bool Main::BFullRow()
 {
 	bool applicable = false;
 	bool blocked;
@@ -306,7 +306,7 @@ bool cMain::BFullRow()
 	return applicable;
 }
 
-bool cMain::PFixedDir()
+bool Main::PFixedDir()
 {
 	bool applicable = false;
 	bool setTrack;
@@ -344,7 +344,7 @@ bool cMain::PFixedDir()
 	return applicable;
 }
 
-bool cMain::PNSpaces()
+bool Main::PNSpaces()
 {
 	bool applicable = false;
 	bool placed;
@@ -391,7 +391,7 @@ bool cMain::PNSpaces()
 	return applicable;
 }
 
-bool cMain::BDeadEnd()
+bool Main::BDeadEnd()
 {
 	bool applicable = false;
 	bool blocked;
@@ -410,7 +410,7 @@ bool cMain::BDeadEnd()
 	return applicable;
 }
 
-bool cMain::BParallelConnections()
+bool Main::BParallelConnections()
 {
 	bool applicable = false;
 
@@ -511,7 +511,7 @@ bool cMain::BParallelConnections()
 	return applicable;
 }
 
-bool cMain::BImpossibleSide()
+bool Main::BImpossibleSide()
 {
 	int railNum;
 	bool applicable = false;
@@ -589,7 +589,7 @@ bool cMain::BImpossibleSide()
 	return applicable;
 }
 
-bool cMain::BDoubleImpossibleSide()
+bool Main::BDoubleImpossibleSide()
 {
 	int railNum;
 	bool applicable = false;
@@ -664,7 +664,7 @@ bool cMain::BDoubleImpossibleSide()
 	return applicable;
 }
 
-bool cMain::BClosedLoop()
+bool Main::BClosedLoop()
 {
 	bool applicable = false;
 	bool trackSet;
@@ -719,7 +719,7 @@ bool cMain::BClosedLoop()
 	return applicable;
 }
 
-bool cMain::IsComplete()
+bool Main::IsComplete()
 {
 	int totalRails = 0;
 	bool labelsCorrect = true;
@@ -853,7 +853,7 @@ bool cMain::IsComplete()
 }
 
 int recursionDepth = 0;
-int cMain::SolutionNum(std::vector<std::vector<Cell>>& boardIn)
+int Main::SolutionNum(std::vector<std::vector<Cell>>& boardIn)
 {
 	recursionDepth++;
 	int solutionNum = 0;
