@@ -1,19 +1,22 @@
-#include "cApp.h"
+#include "App.h"
 
-wxIMPLEMENT_APP(cApp);
+wxIMPLEMENT_APP(App);
 
-cApp::cApp()
+App::App()
 {
 
 }
 
-cApp::~cApp()
+App::~App()
 {
 
 }
 
-bool cApp::OnInit()
+bool App::OnInit()
 {
+	freopen("log.log", "w", stdout);
+	freopen("err.log", "w", stderr);
+
 	m_frame1 = new guiMain();
 	m_frame1->Show();
 	return true;

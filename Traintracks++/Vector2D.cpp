@@ -27,6 +27,11 @@ bool Vector2D::operator==(Vector2D other)
 	return (x == other.x) && (y == other.y);
 }
 
+bool Vector2D::IsUnit()
+{
+	return std::abs(x) + std::abs(y) == 1;
+}
+
 void Vector2D::operator+=(Vector2D add)
 {
 	x += add.x;

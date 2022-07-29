@@ -1,12 +1,10 @@
 #pragma once
 #include "tracks.h"
 
-class Cell
+struct Cell
 {
-public:
-	CellType cellType;
-	std::unordered_map<std::string, State> tracks;
-
-public:
 	Cell();
+
+	CellType cellType;
+	State tracks[4];
 };

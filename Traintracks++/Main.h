@@ -1,9 +1,10 @@
 #pragma once
+#include <iostream>
+#include <cassert>
+#include <optional>
+
 #include "tracks.h"
 #include "Cell.h"
-
-#include <iostream>
-#include <fstream>
 
 class Main
 {
@@ -20,19 +21,23 @@ public:
 	bool Iterate();
 	void Solve();
 	int SolutionNum(std::vector<std::vector<Cell>>& boardIn);
+
 private:
-	std::ofstream cout;
 
 	//Helper Methods
-	std::string GetOppositeDir(std::string dir);
-	bool NextTo(std::string& dir, Vector2D first, Vector2D second);
-	Vector2D DirVal(std::string dir);
+	Direction GetOppositeDir(Direction dir);
+	std::optional<Direction> NextTo(Vector2D first, Vector2D second);
+	Vector2D DirToVec(Direction dir);
+	Direction VecToDir(Vector2D dir);
 
 	bool SetType(Vector2D pos, CellType newType);
-	bool SetTrack(Vector2D pos, std::string dir, State newState);
+	bool SetTrack(Vector2D pos, Direction dir, State newState);
 	CellType ReadType(Vector2D pos);
-	State ReadTrack(Vector2D pos, std::string dir);
+	CellType ReadType(int x, int y);
+	State ReadTrack(Vector2D pos, Direction dir);
+	State ReadTrack(int x, int y, Direction dir);
 	int StateCount(Vector2D pos, State s1, State s2);
+	int StateCount(int x, int y, State s1, State s2);
 
 	//Strategies
 	bool BBlockedTrack();

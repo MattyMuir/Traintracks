@@ -162,27 +162,27 @@ void Canvas::SetRailByIndex(Vector2D pos, int railIndex, bool remove_)
 
 int Canvas::GetRailIndex(Cell cell)
 {
-	if (cell.tracks["right"] == State::GIVEN && cell.tracks["left"] == State::GIVEN)
+	if (cell.tracks[(int)Direction::RIGHT] == State::GIVEN && cell.tracks[(int)Direction::LEFT] == State::GIVEN)
 	{
 		return 0;
 	}
-	if (cell.tracks["up"] == State::GIVEN && cell.tracks["down"] == State::GIVEN)
+	if (cell.tracks[(int)Direction::UP] == State::GIVEN && cell.tracks[(int)Direction::DOWN] == State::GIVEN)
 	{
 		return 1;
 	}
-	if (cell.tracks["up"] == State::GIVEN && cell.tracks["right"] == State::GIVEN)
+	if (cell.tracks[(int)Direction::UP] == State::GIVEN && cell.tracks[(int)Direction::RIGHT] == State::GIVEN)
 	{
 		return 2;
 	}
-	if (cell.tracks["right"] == State::GIVEN && cell.tracks["down"] == State::GIVEN)
+	if (cell.tracks[(int)Direction::RIGHT] == State::GIVEN && cell.tracks[(int)Direction::DOWN] == State::GIVEN)
 	{
 		return 3;
 	}
-	if (cell.tracks["down"] == State::GIVEN && cell.tracks["left"] == State::GIVEN)
+	if (cell.tracks[(int)Direction::DOWN] == State::GIVEN && cell.tracks[(int)Direction::LEFT] == State::GIVEN)
 	{
 		return 4;
 	}
-	if (cell.tracks["left"] == State::GIVEN && cell.tracks["up"] == State::GIVEN)
+	if (cell.tracks[(int)Direction::LEFT] == State::GIVEN && cell.tracks[(int)Direction::UP] == State::GIVEN)
 	{
 		return 5;
 	}
@@ -344,16 +344,16 @@ void Canvas::DrawCells(wxDC& dc)
 			case CellType::UNKNOWN:
 				break;
 			case CellType::RAIL:
-				SetColour(pen, currentCell.tracks["up"]);
+				SetColour(pen, currentCell.tracks[(int)Direction::UP]);
 				dc.SetPen(pen);
 				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x, cellCenter.y - cellH / 2);
-				SetColour(pen, currentCell.tracks["down"]);
+				SetColour(pen, currentCell.tracks[(int)Direction::DOWN]);
 				dc.SetPen(pen);
 				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x, cellCenter.y + cellH / 2);
-				SetColour(pen, currentCell.tracks["right"]);
+				SetColour(pen, currentCell.tracks[(int)Direction::RIGHT]);
 				dc.SetPen(pen);
 				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x + cellW / 2, cellCenter.y);
-				SetColour(pen, currentCell.tracks["left"]);
+				SetColour(pen, currentCell.tracks[(int)Direction::LEFT]);
 				dc.SetPen(pen);
 				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x - cellW / 2, cellCenter.y);
 				break;

@@ -2,11 +2,11 @@
 #include <wx/wx.h>
 #include "guiMain.h"
 
-class cApp : public wxApp
+class App : public wxApp
 {
 public:
-	cApp();
-	~cApp();
+	App();
+	~App();
 
 private:
 	guiMain* m_frame1 = nullptr;

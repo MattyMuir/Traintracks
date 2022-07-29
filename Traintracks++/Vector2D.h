@@ -1,10 +1,13 @@
 #pragma once
-class Vector2D
+#include <cmath>
+
+struct Vector2D
 {
-public:
 	Vector2D();
 	Vector2D(int x_, int y_);
 	int x, y;
+
+	bool IsUnit();
 
 	void operator+=(Vector2D add);
 	Vector2D operator+(Vector2D add);

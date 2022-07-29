@@ -2,8 +2,6 @@
 
 Main::Main()
 {
-	cout = std::ofstream("C:\\Users\\matty\\Desktop\\railslog.txt");
-
 	gridW = 6;
 	gridH = 6;
 
@@ -60,7 +58,6 @@ bool Main::Iterate()
 
 void Main::Solve()
 {
-	cout << "hey";
 	bool done = false;
 
 	while (!done && !unsolvable)
@@ -70,157 +67,174 @@ void Main::Solve()
 	}
 }
 
-std::string Main::GetOppositeDir(std::string dir)
+Direction Main::GetOppositeDir(Direction dir)
 {
-	if (dir == "up") { return "down"; }
-	if (dir == "down") { return "up"; }
-	if (dir == "right") { return "left"; }
-	if (dir == "left") { return "right"; }
-	throw;
+	static constexpr Direction opposites[] = { Direction::DOWN, Direction::UP, Direction::LEFT, Direction::RIGHT };
+	return opposites[(int)dir];
 }
 
-bool Main::NextTo(std::string& dir, Vector2D first, Vector2D second)
+std::optional<Direction> Main::NextTo(Vector2D first, Vector2D second)
 {
-	bool nextTo = false;
-	if (first.x - second.x == 1 && first.y == second.y) { dir = "left"; nextTo = true; }
-	if (first.x - second.x == -1 && first.y == second.y) { dir = "right"; nextTo = true; }
-	if (first.y - second.y == 1 && first.x == second.x) { dir = "up"; nextTo = true; }
-	if (first.y - second.y == -1 && first.x == second.x) { dir = "down"; nextTo = true;}
+	Vector2D del = second - first;
+	bool nextTo = (std::abs(del.x) + std::abs(del.y) == 1);
 
-	return nextTo;
+	if (nextTo)
+		return VecToDir(del);
+	else
+		return {};
 }
 
-Vector2D Main::DirVal(std::string dir)
+Vector2D Main::DirToVec(Direction dir)
 {
-	if (dir == "up") { return Vector2D(0, -1); }
-	if (dir == "down") { return Vector2D(0, 1); }
-	if (dir == "right") { return Vector2D(1, 0); }
-	if (dir == "left") { return Vector2D(-1, 0); }
-	throw;
+	switch (dir)
+	{
+	case Direction::UP:
+		return { 0, -1 };
+		break;
+	case Direction::DOWN:
+		return { 0, 1 };
+		break;
+	case Direction::RIGHT:
+		return { 1, 0 };
+		break;
+	case Direction::LEFT:
+		return { -1, 0 };
+		break;
+	}
+}
+
+Direction Main::VecToDir(Vector2D dir)
+{
+	assert(dir.IsUnit());
+
+	switch (dir.x)
+	{
+	case 0:
+		switch (dir.y)
+		{
+		case -1:
+			return Direction::UP;
+		case 1:
+			return Direction::DOWN;
+		}
+	case -1:
+		return Direction::LEFT;
+	case 1:
+		return Direction::RIGHT;
+	}
 }
 
 bool Main::SetType(Vector2D pos, CellType newType)
 {
-	bool applicable = false;
-	if (InsideGrid(pos))
-	{
-		applicable = (board[pos.y][pos.x].cellType != newType);
-		if (board[pos.y][pos.x].cellType == CellType::BLOCKED && newType == CellType::RAIL)
-		{
-			//throw;
-			unsolvable = true;
-			//cout << "Type set: "<< pos.x << "," << pos.y << std::endl;
-			return false;
-		}
-		if (board[pos.y][pos.x].cellType == CellType::RAIL && newType == CellType::BLOCKED)
-		{
-			//throw;
-			unsolvable = true;
-			//cout << "Type set: " << pos.x << "," << pos.y << std::endl;
-			return false;
-		}
+	if (!InsideGrid(pos)) return false;
 
-		board[pos.y][pos.x].cellType = newType;
+	Cell& cell = board[pos.y][pos.x];
+	bool applicable = (cell.cellType != newType);
 
-		if (newType == CellType::BLOCKED)
-		{
-			std::unordered_map<std::string, State>::iterator it;
-			for (it = board[pos.y][pos.x].tracks.begin(); it != board[pos.y][pos.x].tracks.end(); it++)
-			{
-				it->second = State::IMPOSSIBLE;
-			}
-		}
-	}
-	else
+	// Check if assignment violates logic
+	if (cell.cellType == CellType::BLOCKED && newType == CellType::RAIL)
 	{
+		unsolvable = true;
 		return false;
 	}
+	if (cell.cellType == CellType::RAIL && newType == CellType::BLOCKED)
+	{
+		unsolvable = true;
+		return false;
+	}
+
+	// Assign new type
+	cell.cellType = newType;
+
+	// if blocked, set all rails within to 'IMPOSSIBLE'
+	if (newType == CellType::BLOCKED)
+	{
+		for (int i = 0; i < 4; i++)
+			cell.tracks[i] = State::IMPOSSIBLE;
+	}
+
 	return applicable;
 }
 
-bool Main::SetTrack(Vector2D pos, std::string dir, State newState)
+bool Main::SetTrack(Vector2D pos, Direction dir, State newState)
 {
-	bool applicable = false;
-	if (InsideGrid(pos))
-	{
-		State& currentState = board[pos.y][pos.x].tracks[dir];
-		if (currentState == State::GIVEN) { return false; }
-		if (currentState == State::CERTAIN && newState == State::IMPOSSIBLE)
-		{
-			//throw;
-			unsolvable = true;
-			//cout << "Track set: " << pos.x << "," << pos.y << " Dir: " << dir << std::endl;
-			return false;
-		}
-		if (currentState == State::IMPOSSIBLE && newState == State::CERTAIN)
-		{
-			//throw;
-			unsolvable = true;
-			//cout << "Track set: " << pos.x << "," << pos.y << " Dir: " << dir << std::endl;
-			return false;
-		}
-		applicable = (currentState != newState);
-		currentState = newState;
+	if (!InsideGrid(pos)) return false;
 
-		if (board[pos.y][pos.x].cellType == CellType::UNKNOWN) { applicable = false; }
-	}
-	else
+	bool applicable = false;
+	State& currentState = board[pos.y][pos.x].tracks[(int)dir];
+
+	if (currentState == State::GIVEN) { return false; }
+	if (currentState == State::CERTAIN && newState == State::IMPOSSIBLE)
 	{
+		unsolvable = true;
 		return false;
 	}
+	if (currentState == State::IMPOSSIBLE && newState == State::CERTAIN)
+	{
+		unsolvable = true;
+		return false;
+	}
+
+	applicable = (currentState != newState);
+	currentState = newState;
+
+	if (board[pos.y][pos.x].cellType == CellType::UNKNOWN) { applicable = false; }
+
 	return applicable;
 }
 
 CellType Main::ReadType(Vector2D pos)
 {
-	if (InsideGrid(pos))
-	{
-		return board[pos.y][pos.x].cellType;
-	}
-	return CellType::BLOCKED;
+	if (!InsideGrid(pos)) return CellType::BLOCKED;
+	return board[pos.y][pos.x].cellType;
 }
 
-State Main::ReadTrack(Vector2D pos, std::string dir)
+CellType Main::ReadType(int x, int y)
 {
-	if (InsideGrid(pos))
-	{
-		return board[pos.y][pos.x].tracks[dir];
-	}
-	return State::IMPOSSIBLE;
+	return ReadType({x, y});
+}
+
+State Main::ReadTrack(Vector2D pos, Direction dir)
+{
+	if (!InsideGrid(pos)) return State::IMPOSSIBLE;
+	return board[pos.y][pos.x].tracks[(int)dir];
+}
+
+State Main::ReadTrack(int x, int y, Direction dir)
+{
+	return ReadTrack({x, y}, dir);
 }
 
 int Main::StateCount(Vector2D pos, State s1, State s2)
 {
 	int count = 0;
-	std::unordered_map<std::string, State>::iterator it;
-	for (it = board[pos.y][pos.x].tracks.begin(); it != board[pos.y][pos.x].tracks.end(); it++)
+	for (int i = 0; i < 4; i++)
 	{
-		if (it->second == s1 || it->second == s2)
-		{
+		State state = board[pos.y][pos.x].tracks[i];
+		if (state == s1 || state == s2)
 			count++;
-		}
 	}
 	return count;
+}
+
+int Main::StateCount(int x, int y, State s1, State s2)
+{
+	return StateCount({x, y}, s1, s2);
 }
 
 bool Main::BBlockedTrack()
 {
 	bool applicable = false;
-	bool setTrack;
 	for (int r = 0; r < gridH; r++)
 	{
 		for (int c = 0; c < gridW; c++)
 		{
-			std::unordered_map<std::string, State>::iterator it;
-			for (it = board[r][c].tracks.begin(); it != board[r][c].tracks.end(); it++)
+			for (int i = 0; i < 4; i++)
 			{
 				Vector2D nextPos = Vector2D(c, r);
-				nextPos += DirVal(it->first);
-				if (ReadTrack(nextPos, GetOppositeDir(it->first)) == State::IMPOSSIBLE)
-				{
-					setTrack = SetTrack(Vector2D(c, r), it->first, State::IMPOSSIBLE);
-					applicable = applicable || setTrack;
-				}
+				nextPos += DirToVec((Direction)i);
+				if (ReadTrack(nextPos, GetOppositeDir((Direction)i)) == State::IMPOSSIBLE)
+					applicable = SetTrack(Vector2D(c, r), (Direction)i, State::IMPOSSIBLE);
 			}
 		}
 	}
@@ -235,20 +249,18 @@ bool Main::PRailHead()
 	{
 		for (int c = 0; c < gridW; c++)
 		{
-			if (ReadType(Vector2D(c, r)) == CellType::UNKNOWN || ReadType(Vector2D(c, r)) == CellType::BLOCKED)
-			{
-				continue;
-			}
+			CellType cellType = ReadType(c, r);
+			if (cellType == CellType::UNKNOWN || cellType == CellType::BLOCKED) continue;
 
-			std::unordered_map<std::string, State>::iterator it;
-			for (it = board[r][c].tracks.begin(); it != board[r][c].tracks.end(); it++)
+			for (int i = 0; i < 4; i++)
 			{
-				if (it->second == State::CERTAIN || it->second == State::GIVEN)
+				State state = board[r][c].tracks[i];
+				if (state == State::CERTAIN || state == State::GIVEN)
 				{
 					Vector2D nextPos = Vector2D(c, r);
-					nextPos += DirVal(it->first);
+					nextPos += DirToVec((Direction)i);
 					setType = SetType(nextPos, CellType::RAIL);
-					setTrack = SetTrack(nextPos, GetOppositeDir(it->first), State::CERTAIN);
+					setTrack = SetTrack(nextPos, GetOppositeDir((Direction)i), State::CERTAIN);
 					applicable = applicable || setType || setTrack;
 				}
 			}
@@ -270,7 +282,7 @@ bool Main::BFullRow()
 		{
 			if (ReadType(Vector2D(c, r)) == CellType::RAIL) { railNum++; }
 		}
-		if (railNum > colLabels[c]) { unsolvable = true; /*throw; cout << "Col: " << c;*/ }
+		if (railNum > colLabels[c]) { unsolvable = true; /*throw; std::cout << "Col: " << c;*/ }
 		if (railNum == colLabels[c])
 		{
 			for (int r = 0; r < gridH; r++)
@@ -290,7 +302,7 @@ bool Main::BFullRow()
 		{
 			if (ReadType(Vector2D(c, r)) == CellType::RAIL) { railNum++; }
 		}
-		if (railNum > rowLabels[r]) { unsolvable = true; /*throw; cout << "Row: " << r;*/ }
+		if (railNum > rowLabels[r]) { unsolvable = true; /*throw; std::cout << "Row: " << r;*/ }
 		if (railNum == rowLabels[r])
 		{
 			for (int c = 0; c < gridW; c++)
@@ -314,27 +326,25 @@ bool Main::PFixedDir()
 	{
 		for (int c = 0; c < gridW; c++)
 		{
-			if (ReadType(Vector2D(c, r)) != CellType::RAIL) { continue; }
-			if (StateCount(Vector2D(c, r), State::IMPOSSIBLE, State::IMPOSSIBLE) == 2)
+			if (ReadType(c, r) != CellType::RAIL) { continue; }
+			if (StateCount(c, r, State::IMPOSSIBLE, State::IMPOSSIBLE) == 2)
 			{
-				std::unordered_map<std::string, State>::iterator it;
-				for (it = board[r][c].tracks.begin(); it != board[r][c].tracks.end(); it++)
+				for (int i = 0; i < 4; i++)
 				{
-					if (it->second == State::POSSIBLE)
+					if (board[r][c].tracks[i] == State::POSSIBLE)
 					{
-						setTrack = SetTrack(Vector2D(c, r), it->first, State::CERTAIN);
+						setTrack = SetTrack(Vector2D(c, r), (Direction)i, State::CERTAIN);
 						applicable = applicable || setTrack;
 					}
 				}
 			}
-			if (StateCount(Vector2D(c, r), State::CERTAIN, State::CERTAIN) == 2)
+			if (StateCount(c, r, State::CERTAIN, State::CERTAIN) == 2)
 			{
-				std::unordered_map<std::string, State>::iterator it;
-				for (it = board[r][c].tracks.begin(); it != board[r][c].tracks.end(); it++)
+				for (int i = 0; i < 4; i++)
 				{
-					if (it->second == State::POSSIBLE)
+					if (board[r][c].tracks[i] == State::POSSIBLE)
 					{
-						setTrack = SetTrack(Vector2D(c, r), it->first, State::IMPOSSIBLE);
+						setTrack = SetTrack(Vector2D(c, r), (Direction)i, State::IMPOSSIBLE);
 						applicable = applicable || setTrack;
 					}
 				}
@@ -400,7 +410,7 @@ bool Main::BDeadEnd()
 		for (int c = 0; c < gridW; c++)
 		{
 			if (board[r][c].cellType == CellType::BLOCKED) { continue; }
-			if (StateCount(Vector2D(c, r), State::IMPOSSIBLE, State::IMPOSSIBLE) > 2)
+			if (StateCount(c, r, State::IMPOSSIBLE, State::IMPOSSIBLE) > 2)
 			{
 				blocked = SetType(Vector2D(c, r), CellType::BLOCKED);
 				applicable = applicable || blocked;
@@ -435,16 +445,16 @@ bool Main::BParallelConnections()
 				if (ReadType(Vector2D(c, r)) != CellType::RAIL) { continue; }
 
 				// Count connections
-				if (StateCount(Vector2D(c, r), State::POSSIBLE, State::POSSIBLE) != 2) { continue; }
+				if (StateCount(c, r, State::POSSIBLE, State::POSSIBLE) != 2) { continue; }
 
 				// Check connections are parallel
-				if (ReadTrack(Vector2D(c, r), "up") == State::POSSIBLE && ReadTrack(Vector2D(c, r), "down") == State::POSSIBLE) {}
-				else { continue; }
+				if (ReadTrack(c, r, Direction::UP) != State::POSSIBLE || ReadTrack(c, r, Direction::DOWN) != State::POSSIBLE)
+					continue;
 
 				// Check neighboring cells are empty
 				bool works = true;
-				works = works && (ReadType(Vector2D(c, r) + DirVal("up")) == CellType::UNKNOWN);
-				works = works && (ReadType(Vector2D(c, r) - DirVal("up")) == CellType::UNKNOWN);
+				works &= (ReadType(Vector2D(c, r) + DirToVec(Direction::UP)) == CellType::UNKNOWN);
+				works &= (ReadType(Vector2D(c, r) - DirToVec(Direction::UP)) == CellType::UNKNOWN);
 
 				// Block col
 				if (works)
@@ -482,16 +492,16 @@ bool Main::BParallelConnections()
 				if (ReadType(Vector2D(c, r)) != CellType::RAIL) { continue; }
 
 				// Count connections
-				if (StateCount(Vector2D(c, r), State::POSSIBLE, State::POSSIBLE) != 2) { continue; }
+				if (StateCount(c, r, State::POSSIBLE, State::POSSIBLE) != 2) { continue; }
 
 				// Check connections are parallel
-				if (ReadTrack(Vector2D(c, r), "right") == State::POSSIBLE && ReadTrack(Vector2D(c, r), "left") == State::POSSIBLE) {}
+				if (ReadTrack(c, r, Direction::RIGHT) == State::POSSIBLE && ReadTrack(c, r, Direction::LEFT) == State::POSSIBLE) {}
 				else { continue; }
 
 				// Check neighboring cells are empty
 				bool works = true;
-				works = works && (ReadType(Vector2D(c, r) + DirVal("right")) == CellType::UNKNOWN);
-				works = works && (ReadType(Vector2D(c, r) - DirVal("right")) == CellType::UNKNOWN);
+				works = works && (ReadType(Vector2D(c, r) + DirToVec(Direction::RIGHT)) == CellType::UNKNOWN);
+				works = works && (ReadType(Vector2D(c, r) - DirToVec(Direction::RIGHT)) == CellType::UNKNOWN);
 
 				// Block row
 				if (works)
@@ -532,15 +542,15 @@ bool Main::BImpossibleSide()
 			{
 				if (ReadType(Vector2D(c, r)) == CellType::RAIL) { continue; }
 				bool sideBlocked = false;
-				if (ReadTrack(Vector2D(c + 1, r), "left") == State::IMPOSSIBLE) { sideBlocked = true; }
-				if (ReadTrack(Vector2D(c - 1, r), "right") == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(Vector2D(c + 1, r), Direction::LEFT) == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(Vector2D(c - 1, r), Direction::RIGHT) == State::IMPOSSIBLE) { sideBlocked = true; }
 
 
 				if (sideBlocked)
 				{
 					bool nextToRail = false;
-					if (ReadType(Vector2D(c, r - 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r - 1), "down") != State::IMPOSSIBLE) { nextToRail = true; }
-					if (ReadType(Vector2D(c, r + 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r + 1), "up") != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(Vector2D(c, r - 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r - 1), Direction::DOWN) != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(Vector2D(c, r + 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r + 1), Direction::UP) != State::IMPOSSIBLE) { nextToRail = true; }
 
 					if (!nextToRail)
 					{
@@ -567,15 +577,15 @@ bool Main::BImpossibleSide()
 			{
 				if (ReadType(Vector2D(c, r)) == CellType::RAIL) { continue; }
 				bool sideBlocked = false;
-				if (ReadTrack(Vector2D(c, r - 1), "down") == State::IMPOSSIBLE) { sideBlocked = true; }
-				if (ReadTrack(Vector2D(c, r + 1), "up") == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(Vector2D(c, r - 1), Direction::DOWN) == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(Vector2D(c, r + 1), Direction::UP) == State::IMPOSSIBLE) { sideBlocked = true; }
 
 
 				if (sideBlocked)
 				{
 					bool nextToRail = false;
-					if (ReadType(Vector2D(c - 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c - 1, r), "right") != State::IMPOSSIBLE) { nextToRail = true; }
-					if (ReadType(Vector2D(c + 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c + 1, r), "left") != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(Vector2D(c - 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c - 1, r), Direction::RIGHT) != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(Vector2D(c + 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c + 1, r), Direction::LEFT) != State::IMPOSSIBLE) { nextToRail = true; }
 
 					if (!nextToRail)
 					{
@@ -609,15 +619,15 @@ bool Main::BDoubleImpossibleSide()
 			for (int r = 0; r < gridH; r++)
 			{
 				if (ReadType(Vector2D(c, r)) == CellType::RAIL) { continue; }
-				bool sideBlocked = ReadTrack(Vector2D(c + 1, r), "left") == State::IMPOSSIBLE
-					&& ReadTrack(Vector2D(c - 1, r), "right") == State::IMPOSSIBLE;
+				bool sideBlocked = ReadTrack(Vector2D(c + 1, r), Direction::LEFT) == State::IMPOSSIBLE
+					&& ReadTrack(Vector2D(c - 1, r), Direction::RIGHT) == State::IMPOSSIBLE;
 
 
 				if (sideBlocked)
 				{
 					int nextToRail = 0;
-					if (ReadType(Vector2D(c, r - 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r - 1), "down") != State::IMPOSSIBLE) { nextToRail++; }
-					if (ReadType(Vector2D(c, r + 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r + 1), "up") != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(Vector2D(c, r - 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r - 1), Direction::DOWN) != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(Vector2D(c, r + 1)) == CellType::RAIL && ReadTrack(Vector2D(c, r + 1), Direction::UP) != State::IMPOSSIBLE) { nextToRail++; }
 
 					if ((railNum == colLabels[c] - 2 && nextToRail == 0) || (railNum == colLabels[c] - 1 && nextToRail <= 1))
 					{
@@ -643,14 +653,14 @@ bool Main::BDoubleImpossibleSide()
 			for (int c = 0; c < gridW; c++)
 			{
 				if (ReadType(Vector2D(c, r)) == CellType::RAIL) { continue; }
-				bool sideBlocked = ReadTrack(Vector2D(c, r - 1), "down") == State::IMPOSSIBLE
-					&& ReadTrack(Vector2D(c, r + 1), "up") == State::IMPOSSIBLE;
+				bool sideBlocked = ReadTrack(Vector2D(c, r - 1), Direction::DOWN) == State::IMPOSSIBLE
+					&& ReadTrack(Vector2D(c, r + 1), Direction::UP) == State::IMPOSSIBLE;
 
 				if (sideBlocked)
 				{
 					int nextToRail = 0;
-					if (ReadType(Vector2D(c - 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c - 1, r), "right") != State::IMPOSSIBLE) { nextToRail++; }
-					if (ReadType(Vector2D(c + 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c + 1, r), "left") != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(Vector2D(c - 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c - 1, r), Direction::RIGHT) != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(Vector2D(c + 1, r)) == CellType::RAIL && ReadTrack(Vector2D(c + 1, r), Direction::LEFT) != State::IMPOSSIBLE) { nextToRail++; }
 
 					if ((railNum == rowLabels[r] - 2 && nextToRail == 0) || (railNum == rowLabels[r] - 1 && nextToRail <= 1))
 					{
@@ -681,34 +691,33 @@ bool Main::BClosedLoop()
 			if (StateCount(startPos, State::CERTAIN, State::GIVEN) != 1) { continue; }
 
 			bool pathContinues = true;
-			std::string backwardsDir = "";
-			std::string tempBackwardsDir = "";
+			Direction backwardsDir = Direction::NONE;
+			Direction tempBackwardsDir = Direction::NONE;
 			pathLength = 1;
 			while (pathContinues)
 			{
-				//cout << currentPos.x << "," << currentPos.y << std::endl;
 				pathContinues = false;
 
-				std::unordered_map<std::string, State>::iterator it;
 				Cell& cellRef = board[currentPos.y][currentPos.x];
-				for (it = cellRef.tracks.begin(); it != cellRef.tracks.end(); it++)
+				for (int i = 0; i < 4; i++)
 				{
-					if (it->first == backwardsDir) { continue; }
-					if (it->second == State::CERTAIN || it->second == State::GIVEN)
+					if ((Direction)i == backwardsDir) { continue; }
+					State state = cellRef.tracks[i];
+					if (state == State::CERTAIN || state == State::GIVEN)
 					{
 						pathContinues = true;
 						pathLength++;
-						currentPos += DirVal(it->first);
-						tempBackwardsDir = GetOppositeDir(it->first);
+						currentPos += DirToVec((Direction)i);
+						tempBackwardsDir = GetOppositeDir((Direction)i);
 					}
 				}
 				backwardsDir = tempBackwardsDir;
 
 				if (pathLength == 2) { continue; }
-				std::string relDir;
-				if (NextTo(relDir, startPos, currentPos))
+				auto relDir = NextTo(startPos, currentPos);
+				if (relDir.has_value())
 				{
-					trackSet = SetTrack(startPos, relDir, State::IMPOSSIBLE);
+					trackSet = SetTrack(startPos, relDir.value(), State::IMPOSSIBLE);
 					applicable = applicable || trackSet;
 				}
 				if (pathLength > gridW * gridH) { break; }
@@ -729,8 +738,8 @@ bool Main::IsComplete()
 	Vector2D pos1 = Vector2D(-1, -1);
 	Vector2D pos2 = Vector2D(-1, -1);
 
-	std::string backwardsDir = "";
-	std::string tempBackwardsDir = "";
+	Direction backwardsDir = Direction::NONE;
+	Direction tempBackwardsDir = Direction::NONE;
 
 	for (int c = 0; c < gridW; c++)
 	{
@@ -756,9 +765,9 @@ bool Main::IsComplete()
 
 	for (int c = 0; c < gridW; c++)
 	{
-		if (ReadTrack(Vector2D(c, 0), "up") == State::GIVEN)
+		if (ReadTrack(Vector2D(c, 0), Direction::UP) == State::GIVEN)
 		{
-			backwardsDir = "up";
+			backwardsDir = Direction::UP;
 			if (!foundFirst)
 			{
 				pos1 = Vector2D(c, 0);
@@ -769,9 +778,9 @@ bool Main::IsComplete()
 				pos2 = Vector2D(c, 0);
 			}
 		}
-		if (ReadTrack(Vector2D(c, gridH - 1), "down") == State::GIVEN)
+		if (ReadTrack(Vector2D(c, gridH - 1), Direction::DOWN) == State::GIVEN)
 		{
-			backwardsDir = "down";
+			backwardsDir = Direction::DOWN;
 			if (!foundFirst)
 			{
 				pos1 = Vector2D(c, gridH - 1);
@@ -786,9 +795,9 @@ bool Main::IsComplete()
 
 	for (int r = 0; r < gridH; r++)
 	{
-		if (ReadTrack(Vector2D(0, r), "left") == State::GIVEN)
+		if (ReadTrack(Vector2D(0, r), Direction::LEFT) == State::GIVEN)
 		{
-			backwardsDir = "left";
+			backwardsDir = Direction::LEFT;
 			if (!foundFirst)
 			{
 				pos1 = Vector2D(0, r);
@@ -799,9 +808,9 @@ bool Main::IsComplete()
 				pos2 = Vector2D(0, r);
 			}
 		}
-		if (ReadTrack(Vector2D(gridW - 1, r), "right") == State::GIVEN)
+		if (ReadTrack(Vector2D(gridW - 1, r), Direction::RIGHT) == State::GIVEN)
 		{
-			backwardsDir = "right";
+			backwardsDir = Direction::RIGHT;
 			if (!foundFirst)
 			{
 				pos1 = Vector2D(gridW - 1, r);
@@ -824,15 +833,17 @@ bool Main::IsComplete()
 		std::unordered_map<std::string, State>::iterator it;
 		if (!InsideGrid(currentPos)) { return false; }
 		Cell& cellRef = board[currentPos.y][currentPos.x];
-		for (it = cellRef.tracks.begin(); it != cellRef.tracks.end(); it++)
+		for (int i = 0; i < 4; i++)
 		{
-			if (it->first == backwardsDir) { continue; }
-			if (it->second == State::CERTAIN || it->second == State::GIVEN)
+			if ((Direction)i == backwardsDir) { continue; }
+
+			State state = cellRef.tracks[i];
+			if (state == State::CERTAIN || state == State::GIVEN)
 			{
 				pathContinues = true;
-				currentPos += DirVal(it->first);
+				currentPos += DirToVec((Direction)i);
 				railsPassed++;
-				tempBackwardsDir = GetOppositeDir(it->first);
+				tempBackwardsDir = GetOppositeDir((Direction)i);
 			}
 		}
 		backwardsDir = tempBackwardsDir;
@@ -862,9 +873,9 @@ int Main::SolutionNum(std::vector<std::vector<Cell>>& boardIn)
 	Solve();
 	std::vector<std::vector<Cell>> boardBackup = board;
 
-	//cout << "Unsolvable: " << unsolvable << std::endl;
+	//std::cout << "Unsolvable: " << unsolvable << std::endl;
 	bool isComplete = IsComplete();
-	cout << "Depth " << recursionDepth << ": " << isComplete << std::endl;
+	std::cout << "Depth " << recursionDepth << ": " << isComplete << std::endl;
 	if (isComplete) { recursionDepth--; return 1; }
 	if (unsolvable) { recursionDepth--; return 0; }
 
@@ -878,8 +889,8 @@ int Main::SolutionNum(std::vector<std::vector<Cell>>& boardIn)
 		{
 			if (ReadType(Vector2D(c, r)) == CellType::RAIL)
 			{
-				uncertainRails += StateCount(Vector2D(c, r), State::POSSIBLE, State::POSSIBLE);
-				if (StateCount(Vector2D(c, r), State::POSSIBLE, State::POSSIBLE) >= 2 && !foundBranch)
+				uncertainRails += StateCount(c, r, State::POSSIBLE, State::POSSIBLE);
+				if (StateCount(c, r, State::POSSIBLE, State::POSSIBLE) >= 2 && !foundBranch)
 				{
 					branchPos = Vector2D(c, r);
 					foundBranch = true;
@@ -889,12 +900,12 @@ int Main::SolutionNum(std::vector<std::vector<Cell>>& boardIn)
 	}
 	if (uncertainRails == 0) { recursionDepth--; return 0; }
 
-	if (recursionDepth == 1) { cout << "Branch " << branchPos.x << ", " << branchPos.y << std::endl; }
+	if (recursionDepth == 1) { std::cout << "Branch " << branchPos.x << ", " << branchPos.y << std::endl; }
 
-	std::vector<std::string> dirs{"up", "down", "right", "left"};
-	for (std::string dir : dirs)
+	Direction dirs[] = {Direction::UP, Direction::DOWN, Direction::RIGHT, Direction::LEFT};
+	for (Direction dir : dirs)
 	{
-		cout << "Track in " << dir << ": " << (int)board[branchPos.y][branchPos.x].tracks[dir] << std::endl;
+		std::cout << "Track in " << (int)dir << ": " << (int)board[branchPos.y][branchPos.x].tracks[(int)dir] << std::endl;
 		if (ReadTrack(branchPos, dir) == State::POSSIBLE)
 		{
 			SetTrack(branchPos, dir, State::CERTAIN);
@@ -903,7 +914,7 @@ int Main::SolutionNum(std::vector<std::vector<Cell>>& boardIn)
 
 			board = boardBackup;
 		}
-		cout << "Track out " << dir << ": " << (int)board[branchPos.y][branchPos.x].tracks[dir] << std::endl;
+		std::cout << "Track out " << (int)dir << ": " << (int)board[branchPos.y][branchPos.x].tracks[(int)dir] << std::endl;
 	}
 
 	recursionDepth--;

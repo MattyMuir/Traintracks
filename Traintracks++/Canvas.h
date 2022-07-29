@@ -12,12 +12,12 @@
 #include <sstream>
 
 #define CASE(up, down, right, left) \
-	(*boardPtr)[pos.y][pos.x].tracks["up"] = up; \
-	(*boardPtr)[pos.y][pos.x].tracks["down"] = down; \
-	(*boardPtr)[pos.y][pos.x].tracks["right"] = right; \
-	(*boardPtr)[pos.y][pos.x].tracks["left"] = left
+	(*boardPtr)[pos.y][pos.x].tracks[(int)Direction::UP] = up; \
+	(*boardPtr)[pos.y][pos.x].tracks[(int)Direction::DOWN] = down; \
+	(*boardPtr)[pos.y][pos.x].tracks[(int)Direction::RIGHT] = right; \
+	(*boardPtr)[pos.y][pos.x].tracks[(int)Direction::LEFT] = left
 
-class Canvas : wxWindow
+class Canvas : public wxWindow
 {
 public:
 	Canvas(wxWindow* parent, 
