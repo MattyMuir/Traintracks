@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cApp.h">
+    <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cell.h">
@@ -27,13 +27,13 @@
     <ClInclude Include="tracks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cCanvas.h">
+    <ClInclude Include="Canvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="guiMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cMain.h">
+    <ClInclude Include="Main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vector2D.h">
@@ -41,19 +41,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cApp.cpp">
+    <ClCompile Include="App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Cell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cCanvas.cpp">
+    <ClCompile Include="Canvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="guiMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cMain.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vector2D.cpp">

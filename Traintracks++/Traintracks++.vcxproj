@@ -19,20 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cApp.h" />
-    <ClInclude Include="cCanvas.h" />
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Canvas.h" />
     <ClInclude Include="Cell.h" />
-    <ClInclude Include="cMain.h" />
+    <ClInclude Include="Main.h" />
     <ClInclude Include="guiMain.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="tracks.h" />
     <ClInclude Include="Vector2D.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cApp.cpp" />
-    <ClCompile Include="cCanvas.cpp" />
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Cell.cpp" />
-    <ClCompile Include="cMain.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="guiMain.cpp" />
     <ClCompile Include="Vector2D.cpp" />
   </ItemGroup>
