@@ -40,7 +40,7 @@ private:
 	Board board;
 
 	void OnDraw(wxDC& dc);
-	void OnPaint(wxPaintEvent& evt);
+	void OnPaint(wxPaintEvent&);
 
 	void SetColour(wxPen& pen, State state);
 
@@ -67,6 +67,7 @@ private:
 	void PlaceRail(IntVec screen);
 
 	void OnKeyPressed(wxKeyEvent& evt);
+	void Resized(wxSizeEvent& evt);
 
 	wxDECLARE_EVENT_TABLE();
 

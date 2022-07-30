@@ -4,6 +4,7 @@
 
 #include "Board.h"
 #include "IntVec.h"
+#include "Timer.h"
 
 enum class Direction { UP = 0, DOWN, RIGHT, LEFT, NONE };
 enum class StrategyResult { SUCCESS, UNSUITABLE, FOUND_FLAW };

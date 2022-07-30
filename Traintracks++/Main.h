@@ -11,16 +11,13 @@ public:
 private:
 	wxMenuBar* menuBar = nullptr;
 
-	void OnMenuNew(wxCommandEvent& evt);
+	void OnMenuNew(wxCommandEvent&);
 
 	void OnMenuOpen(wxCommandEvent& evt);
 	void OnMenuSave(wxCommandEvent& evt);
 	void OnMenuExit(wxCommandEvent& evt);
 
 	Canvas* canvas = nullptr;
-	wxDialog* dlg = nullptr;
-	wxSizer* dlgSzr = nullptr;
-	wxButton* dlgBtn = nullptr;
 
 	wxDECLARE_EVENT_TABLE();
 };

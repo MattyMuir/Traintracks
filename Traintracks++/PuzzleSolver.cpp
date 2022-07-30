@@ -5,7 +5,6 @@ PuzzleSolver::PuzzleSolver(Board* boardPtr_)
 
 StrategyResult PuzzleSolver::TakeStep()
 {
-	Board& board = *boardPtr;
 	StrategyResult last = StrategyResult::UNSUITABLE;
 
 	if (last == StrategyResult::UNSUITABLE) { last = PRailHead(); }
@@ -24,7 +23,7 @@ StrategyResult PuzzleSolver::TakeStep()
 
 StrategyResult PuzzleSolver::Solve()
 {
-	Board& board = *boardPtr;
+	TIMER(solve);
 
 	StrategyResult last;
 	do
@@ -34,7 +33,11 @@ StrategyResult PuzzleSolver::Solve()
 
 	if (last == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 
-	if (IsSolved())
+	bool isSolved = IsSolved();
+
+	STOP_LOG(solve);
+
+	if (isSolved)
 		return StrategyResult::SUCCESS;
 	else
 		return StrategyResult::UNSUITABLE;
@@ -212,6 +215,8 @@ IntVec PuzzleSolver::DirToVec(Direction dir)
 		return { -1, 0 };
 		break;
 	}
+
+	return { 0, 0 };
 }
 
 Direction PuzzleSolver::VecToDir(IntVec dir)
@@ -233,6 +238,8 @@ Direction PuzzleSolver::VecToDir(IntVec dir)
 	case 1:
 		return Direction::RIGHT;
 	}
+
+	return Direction::NONE;
 }
 
 StrategyResult PuzzleSolver::SetType(int x, int y, CellType newType)
@@ -778,7 +785,6 @@ StrategyResult PuzzleSolver::BDoubleImpossibleSide()
 
 	int railNum;
 	bool applicable = false;
-	bool blocked;
 	for (int c = 0; c < board.w; c++)
 	{
 		railNum = 0;

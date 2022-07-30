@@ -37,16 +37,15 @@ Main::~Main()
 
 }
 
-void Main::OnMenuNew(wxCommandEvent& evt)
+void Main::OnMenuNew(wxCommandEvent&)
 {
-	dlg = new wxDialog(this, wxID_ANY, "New Puzzle", wxDefaultPosition, wxSize(200, 120));
-	dlgSzr = dlg->CreateButtonSizer(0);
+	wxDialog* dlg = new wxDialog(this, wxID_ANY, "New Puzzle", wxDefaultPosition, wxSize(200, 120));
 
 	wxTextCtrl* dlgTextW = new wxTextCtrl(dlg, wxID_ANY, "", wxPoint(20, 10), wxSize(50, 20));
-	wxStaticText* wLab = new wxStaticText(dlg, wxID_ANY, "w:", wxPoint(5, 10));
-	wxStaticText* hLab = new wxStaticText(dlg, wxID_ANY, "h:", wxPoint(75, 10));
+	new wxStaticText(dlg, wxID_ANY, "w:", wxPoint(5, 10));
+	new wxStaticText(dlg, wxID_ANY, "h:", wxPoint(75, 10));
 	wxTextCtrl* dlgTextH = new wxTextCtrl(dlg, wxID_ANY, "", wxPoint(90, 10), wxSize(50, 20));
-	dlgBtn = new wxButton(dlg, wxID_OK, "Ok", wxPoint(55, 40), wxSize(70, 30));
+	new wxButton(dlg, wxID_OK, "Ok", wxPoint(55, 40), wxSize(70, 30));
 
 	if (dlg->ShowModal() == wxID_OK)
 	{
@@ -54,11 +53,11 @@ void Main::OnMenuNew(wxCommandEvent& evt)
 		auto hStr = dlgTextH->GetValue().ToStdString();
 
 		bool validInputs = true;
-		int w, h;
+		int w = 0, h = 0;
 		try
 		{
-			w = std::stoi(wStr, nullptr, 10);
-			h = std::stoi(hStr, nullptr, 10);
+			w = std::stoi(wStr);
+			h = std::stoi(hStr);
 		}
 		catch (std::exception e) { validInputs = false; }
 

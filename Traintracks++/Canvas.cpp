@@ -1,13 +1,14 @@
 #include "Canvas.h"
 
 wxBEGIN_EVENT_TABLE(Canvas, wxWindow)
-EVT_PAINT(Canvas::OnPaint)
-EVT_LEFT_DOWN(MouseDown)
-EVT_RIGHT_DOWN(MouseDownRight)
-EVT_RIGHT_UP(MouseUpRight)
-EVT_LEFT_UP(MouseUp)
-EVT_MOTION(MouseMoved)
-EVT_KEY_DOWN(OnKeyPressed)
+	EVT_PAINT(Canvas::OnPaint)
+	EVT_SIZE(Canvas::Resized)
+	EVT_LEFT_DOWN(MouseDown)
+	EVT_RIGHT_DOWN(MouseDownRight)
+	EVT_RIGHT_UP(MouseUpRight)
+	EVT_LEFT_UP(MouseUp)
+	EVT_MOTION(MouseMoved)
+	EVT_KEY_DOWN(OnKeyPressed)
 wxEND_EVENT_TABLE()
 
 Canvas::Canvas(wxWindow* parent) : wxWindow(parent, wxID_ANY),
@@ -27,7 +28,7 @@ void Canvas::OnDraw(wxDC& dc)
 	DrawLabels(dc);
 }
 
-void Canvas::OnPaint(wxPaintEvent& evt)
+void Canvas::OnPaint(wxPaintEvent&)
 {
 	wxBufferedPaintDC dc(this);
 	wxGCDC gcdc(dc);
@@ -467,4 +468,13 @@ void Canvas::OnKeyPressed(wxKeyEvent& evt)
 			this->Refresh();
 		}
 	}
+}
+
+void Canvas::Resized(wxSizeEvent& evt)
+{
+	int newW, newH;
+	GetSize(&newW, &newH);
+	Refresh();
+
+	evt.Skip();
 }
