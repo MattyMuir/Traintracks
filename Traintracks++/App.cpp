@@ -17,7 +17,7 @@ bool App::OnInit()
 	freopen("log.log", "w", stdout);
 	freopen("err.log", "w", stderr);
 
-	m_frame1 = new guiMain();
-	m_frame1->Show();
+	frame = new Main();
+	frame->Show();
 	return true;
 }

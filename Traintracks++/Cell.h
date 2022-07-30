@@ -1,10 +1,9 @@
 #pragma once
-#include "tracks.h"
+enum class CellType { UNKNOWN, RAIL, BLOCKED };
+enum class State { CERTAIN, POSSIBLE, IMPOSSIBLE, GIVEN };
 
 struct Cell
 {
-	Cell();
-
-	CellType cellType;
-	State tracks[4];
+	CellType cellType = CellType::UNKNOWN;
+	State tracks[4] = { State::POSSIBLE, State::POSSIBLE, State::POSSIBLE, State::POSSIBLE };
 };

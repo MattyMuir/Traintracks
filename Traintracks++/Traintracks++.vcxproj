@@ -20,21 +20,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Board.h" />
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="Main.h" />
-    <ClInclude Include="guiMain.h" />
-    <ClInclude Include="enums.h" />
-    <ClInclude Include="tracks.h" />
-    <ClInclude Include="Vector2D.h" />
+    <ClInclude Include="PuzzleSolver.h" />
+    <ClInclude Include="IntVec.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Board.cpp" />
     <ClCompile Include="Canvas.cpp" />
-    <ClCompile Include="Cell.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="guiMain.cpp" />
-    <ClCompile Include="Vector2D.cpp" />
+    <ClCompile Include="PuzzleSolver.cpp" />
+    <ClCompile Include="IntVec.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
