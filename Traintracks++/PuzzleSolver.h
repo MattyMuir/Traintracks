@@ -1,5 +1,9 @@
 #pragma once
 #include <cassert>
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <stack>
 #include <optional>
 
 #include "Board.h"
@@ -16,6 +20,8 @@ public:
 
 	StrategyResult TakeStep();
 	StrategyResult Solve();
+
+	int SolutionNum();
 
 protected:
 	Board* boardPtr;
@@ -50,4 +56,7 @@ protected:
 	StrategyResult BImpossibleSide();
 	StrategyResult BDoubleImpossibleSide();
 	StrategyResult BClosedLoop();
+
+	// Brute Force
+	static void PushBifurcations(std::stack<Board*>& boards, const Board& board);
 };

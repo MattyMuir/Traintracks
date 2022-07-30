@@ -23,7 +23,7 @@ StrategyResult PuzzleSolver::TakeStep()
 
 StrategyResult PuzzleSolver::Solve()
 {
-	TIMER(solve);
+	//TIMER(solve);
 
 	StrategyResult last;
 	do
@@ -35,7 +35,7 @@ StrategyResult PuzzleSolver::Solve()
 
 	bool isSolved = IsSolved();
 
-	STOP_LOG(solve);
+	//STOP_LOG(solve);
 
 	if (isSolved)
 		return StrategyResult::SUCCESS;
@@ -58,14 +58,16 @@ bool PuzzleSolver::IsSolved() const
 	Direction backwardsDir = Direction::NONE;
 	Direction tempBackwardsDir = Direction::NONE;
 
+	// ===== Check labels =====
 	for (int c = 0; c < board.w; c++)
 	{
 		totalRails += board.colLabels[c];
 
 		int colNum = 0;
-		for (int r = 0; r < board.w; r++)
+		for (int r = 0; r < board.h; r++)
 		{
-			if (ReadType(c, r) == CellType::RAIL) { colNum++; }
+			if (ReadType(c, r) == CellType::RAIL)
+				colNum++;
 		}
 		labelsCorrect = labelsCorrect && (colNum == board.colLabels[c]);
 	}
@@ -80,13 +82,14 @@ bool PuzzleSolver::IsSolved() const
 		labelsCorrect = labelsCorrect && (rowNum == board.rowLabels[r]);
 	}
 
+	// ===== Find start and end =====
 	for (int c = 0; c < board.w; c++)
 	{
 		if (ReadTrack(c, 0, Direction::UP) == State::GIVEN)
 		{
-			backwardsDir = Direction::UP;
 			if (!foundFirst)
 			{
+				backwardsDir = Direction::UP;
 				pos1 = { c, 0 };
 				foundFirst = true;
 			}
@@ -97,9 +100,9 @@ bool PuzzleSolver::IsSolved() const
 		}
 		if (ReadTrack(c, board.h - 1, Direction::DOWN) == State::GIVEN)
 		{
-			backwardsDir = Direction::DOWN;
 			if (!foundFirst)
 			{
+				backwardsDir = Direction::DOWN;
 				pos1 = { c, board.h - 1 };
 				foundFirst = true;
 			}
@@ -114,9 +117,9 @@ bool PuzzleSolver::IsSolved() const
 	{
 		if (ReadTrack(0, r, Direction::LEFT) == State::GIVEN)
 		{
-			backwardsDir = Direction::LEFT;
 			if (!foundFirst)
 			{
+				backwardsDir = Direction::LEFT;
 				pos1 = { 0, r };
 				foundFirst = true;
 			}
@@ -127,9 +130,9 @@ bool PuzzleSolver::IsSolved() const
 		}
 		if (ReadTrack(board.w - 1, r, Direction::RIGHT) == State::GIVEN)
 		{
-			backwardsDir = Direction::RIGHT;
 			if (!foundFirst)
 			{
+				backwardsDir = Direction::RIGHT;
 				pos1 = { board.w - 1, r };
 				foundFirst = true;
 			}
@@ -140,6 +143,7 @@ bool PuzzleSolver::IsSolved() const
 		}
 	}
 
+	// ===== Check that start connects to end =====
 	IntVec currentPos = pos1;
 	bool pathContinues = true;
 	int railsPassed = 1;
@@ -149,6 +153,7 @@ bool PuzzleSolver::IsSolved() const
 
 		if (!board.In(currentPos)) { return false; }
 		const Cell& cellRef = board[currentPos.y][currentPos.x];
+		railsPassed++;
 		for (int i = 0; i < 4; i++)
 		{
 			if ((Direction)i == backwardsDir) { continue; }
@@ -158,7 +163,6 @@ bool PuzzleSolver::IsSolved() const
 			{
 				pathContinues = true;
 				currentPos += DirToVec((Direction)i);
-				railsPassed++;
 				tempBackwardsDir = Opposite((Direction)i);
 			}
 		}
@@ -917,4 +921,81 @@ StrategyResult PuzzleSolver::BClosedLoop()
 		return StrategyResult::SUCCESS;
 	else
 		return StrategyResult::UNSUITABLE;
+}
+
+int PuzzleSolver::SolutionNum()
+{
+	TIMER(count);
+
+	std::stack<Board*> boards;
+	boards.push(new Board(*boardPtr));
+
+	int solutionNum = 0;
+	Board solution;
+	while (boards.size() > 0)
+	{
+		Board* currentBoard = boards.top();
+		boards.pop();
+
+		PuzzleSolver solver(currentBoard);
+		StrategyResult solveResult = solver.Solve();
+
+		switch (solveResult)
+		{
+		case StrategyResult::SUCCESS:
+			solutionNum++;
+			if (solutionNum == 1)
+				solution = *currentBoard;
+			break;
+		case StrategyResult::FOUND_FLAW:
+			break;
+		case StrategyResult::UNSUITABLE:
+			PushBifurcations(boards, *currentBoard);
+			break;
+		}
+
+		delete currentBoard;
+	}
+
+	if (solutionNum == 1)
+		*boardPtr = solution;
+
+	STOP_LOG(count);
+
+	return solutionNum;
+}
+
+void PuzzleSolver::PushBifurcations(std::stack<Board*>& boards, const Board& board)
+{
+	for (int c = 0; c < board.w; c++)
+	{
+		for (int r = 0; r < board.h; r++)
+		{
+			const Cell& cell = board.cells[r][c];
+			if (cell.cellType == CellType::RAIL)
+			{
+				int uncertainRails = 0;
+				for (int i = 0; i < 4; i++)
+					if (cell.tracks[i] == State::POSSIBLE)
+						uncertainRails++;
+
+				if (uncertainRails >= 2)
+				{
+					for (int i = 0; i < 4; i++)
+					{
+						if (cell.tracks[i] == State::POSSIBLE)
+						{
+							Board* bifurcation = new Board(board);
+							bifurcation->cells[r][c].tracks[i] = State::CERTAIN;
+
+							boards.push(bifurcation);
+						}
+					}
+
+					// Only bifurcate on one cell at a time
+					return;
+				}
+			}
+		}
+	}
 }

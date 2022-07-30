@@ -10,6 +10,7 @@ class PuzzleSolver;
 class Board
 {
 public:
+	Board() {};
 	Board(int w_, int h_);
 
 	std::vector<Cell>& operator[](int y);
@@ -21,7 +22,7 @@ public:
 	void Resize(int w_, int h_);
 	void ResetLabels();
 
-	int w, h;
+	int w = 0, h = 0;
 
 protected:
 	std::vector<std::vector<Cell>> cells;

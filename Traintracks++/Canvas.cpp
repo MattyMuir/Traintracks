@@ -102,6 +102,7 @@ void Canvas::SetRailByIndex(IntVec pos, int railIndex, bool remove_)
 			break;
 		case 9:
 			board.cells[pos.y][pos.x].cellType = CellType::UNKNOWN;
+			CASE(State::POSSIBLE, State::POSSIBLE, State::POSSIBLE, State::POSSIBLE);
 			break;
 		}
 	}
@@ -441,7 +442,15 @@ void Canvas::OnKeyPressed(wxKeyEvent& evt)
 	}
 	else if (evt.GetKeyCode() == 'N')
 	{
+		PuzzleSolver solver(&board);
+		int solutionNum = solver.SolutionNum();
+		Refresh();
+		wxDialog* dlg = new wxDialog(this, wxID_ANY, "Result");
+		wxString solutionNumText;
+		solutionNumText << solutionNum;
+		new wxStaticText(dlg, wxID_ANY, solutionNumText);
 
+		if (dlg->ShowModal());
 	}
 	else
 	{
