@@ -237,12 +237,12 @@ void Canvas::DrawGrid(wxDC& dc)
 
 	for (int r = 0; r < board.h + 1; r++)
 	{
-		dc.DrawLine(0, lineY, TGridW, lineY);
+		dc.GetGraphicsContext()->StrokeLine(0, lineY, TGridW, lineY);
 		lineY -= cellH;
 	}
 	for (int c = 0; c < board.w + 1; c++)
 	{
-		dc.DrawLine(lineX, screenH - TGridH, lineX, screenH);
+		dc.GetGraphicsContext()->StrokeLine(lineX, screenH - TGridH, lineX, screenH);
 		lineX += cellW;
 	}
 }
@@ -289,16 +289,16 @@ void Canvas::DrawCells(wxDC& dc)
 			case CellType::RAIL:
 				SetColour(pen, currentCell.tracks[(int)Direction::UP]);
 				dc.SetPen(pen);
-				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x, cellCenter.y - cellH / 2);
+				dc.GetGraphicsContext()->StrokeLine(cellCenter.x, cellCenter.y, cellCenter.x, cellCenter.y - cellH / 2);
 				SetColour(pen, currentCell.tracks[(int)Direction::DOWN]);
 				dc.SetPen(pen);
-				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x, cellCenter.y + cellH / 2);
+				dc.GetGraphicsContext()->StrokeLine(cellCenter.x, cellCenter.y, cellCenter.x, cellCenter.y + cellH / 2);
 				SetColour(pen, currentCell.tracks[(int)Direction::RIGHT]);
 				dc.SetPen(pen);
-				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x + cellW / 2, cellCenter.y);
+				dc.GetGraphicsContext()->StrokeLine(cellCenter.x, cellCenter.y, cellCenter.x + cellW / 2, cellCenter.y);
 				SetColour(pen, currentCell.tracks[(int)Direction::LEFT]);
 				dc.SetPen(pen);
-				dc.DrawLine(cellCenter.x, cellCenter.y, cellCenter.x - cellW / 2, cellCenter.y);
+				dc.GetGraphicsContext()->StrokeLine(cellCenter.x, cellCenter.y, cellCenter.x - cellW / 2, cellCenter.y);
 				break;
 			case CellType::BLOCKED:
 				pen.SetColour(*wxBLACK);
@@ -307,7 +307,7 @@ void Canvas::DrawCells(wxDC& dc)
 				brush.SetColour(*wxBLACK);
 				dc.SetPen(pen);
 				dc.SetBrush(brush);
-				dc.DrawRectangle(cellCorner.x, cellCorner.y, cellW, cellH);
+				dc.GetGraphicsContext()->DrawRectangle(cellCorner.x, cellCorner.y, cellW, cellH);
 				break;
 			}
 
@@ -335,7 +335,7 @@ void Canvas::DrawLabels(wxDC& dc)
 			dc.SetTextForeground(wxColour(255, 200, 50));
 		}
 
-		dc.DrawText(labStr, c * cellW + cellW / 2 - width / 2, screenH - (cellH * board.h) - cellH / 2 - height / 2);
+		dc.GetGraphicsContext()->DrawText(labStr, c * cellW + cellW / 2 - width / 2, screenH - (cellH * board.h) - cellH / 2 - height / 2);
 		dc.SetTextForeground(wxColour(0, 0, 0));
 	}
 	for (int r = 0; r < board.h; r++)
@@ -351,7 +351,7 @@ void Canvas::DrawLabels(wxDC& dc)
 			dc.SetTextForeground(wxColour(255, 200, 50));
 		}
 
-		dc.DrawText(labStr, cellW * board.w + cellW / 2 - width / 2, screenH - (cellH * board.h) + cellH * r + cellH / 2 - height / 2);
+		dc.GetGraphicsContext()->DrawText(labStr, cellW * board.w + cellW / 2 - width / 2, screenH - (cellH * board.h) + cellH * r + cellH / 2 - height / 2);
 		dc.SetTextForeground(wxColour(0, 0, 0));
 	}
 }
