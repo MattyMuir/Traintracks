@@ -395,7 +395,7 @@ StrategyResult PuzzleSolver::PRailHead()
 				State state = board[r][c].tracks[i];
 				if (state == State::CERTAIN || state == State::GIVEN)
 				{
-					IntVec nextPos = IntVec(c, r);
+					IntVec nextPos = { c, r };
 					nextPos += DirToVec((Direction)i);
 					setType = SetType(nextPos, CellType::RAIL);
 					setTrack = SetTrack(nextPos, Opposite((Direction)i), State::CERTAIN);
@@ -426,7 +426,7 @@ StrategyResult PuzzleSolver::BFullRow()
 	{
 		railNum = 0;
 		for (int r = 0; r < board.h; r++)
-			if (ReadType(IntVec(c, r)) == CellType::RAIL) { railNum++; }
+			if (ReadType(c, r) == CellType::RAIL) { railNum++; }
 
 		if (railNum > board.colLabels[c]) return StrategyResult::FOUND_FLAW;
 
@@ -437,7 +437,7 @@ StrategyResult PuzzleSolver::BFullRow()
 			{
 				if (ReadType(c, r) == CellType::UNKNOWN)
 				{
-					StrategyResult res = SetType(IntVec(c, r), CellType::BLOCKED);
+					StrategyResult res = SetType(c, r, CellType::BLOCKED);
 					if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 					applicable |= (res == StrategyResult::SUCCESS);
 				}
@@ -448,7 +448,7 @@ StrategyResult PuzzleSolver::BFullRow()
 	{
 		railNum = 0;
 		for (int c = 0; c < board.w; c++)
-			if (ReadType(IntVec(c, r)) == CellType::RAIL) { railNum++; }
+			if (ReadType(c, r) == CellType::RAIL) { railNum++; }
 
 		if (railNum > board.rowLabels[r]) return StrategyResult::FOUND_FLAW;
 
@@ -457,9 +457,9 @@ StrategyResult PuzzleSolver::BFullRow()
 		{
 			for (int c = 0; c < board.w; c++)
 			{
-				if (ReadType(IntVec(c, r)) == CellType::UNKNOWN)
+				if (ReadType(c, r) == CellType::UNKNOWN)
 				{
-					StrategyResult res = SetType(IntVec(c, r), CellType::BLOCKED);
+					StrategyResult res = SetType(c, r, CellType::BLOCKED);
 					if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 					applicable |= (res == StrategyResult::SUCCESS);
 				}
@@ -489,7 +489,7 @@ StrategyResult PuzzleSolver::PFixedDir()
 				{
 					if (board[r][c].tracks[i] == State::POSSIBLE)
 					{
-						StrategyResult res = SetTrack(IntVec(c, r), (Direction)i, State::CERTAIN);
+						StrategyResult res = SetTrack(c, r, (Direction)i, State::CERTAIN);
 						if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 						applicable |= (res == StrategyResult::SUCCESS);
 					}
@@ -501,7 +501,7 @@ StrategyResult PuzzleSolver::PFixedDir()
 				{
 					if (board[r][c].tracks[i] == State::POSSIBLE)
 					{
-						StrategyResult res = SetTrack(IntVec(c, r), (Direction)i, State::IMPOSSIBLE);
+						StrategyResult res = SetTrack(c, r, (Direction)i, State::IMPOSSIBLE);
 						if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 						applicable |= (res == StrategyResult::SUCCESS);
 					}
@@ -528,15 +528,15 @@ StrategyResult PuzzleSolver::PNSpaces()
 		blockedNum = 0;
 		for (int r = 0; r < board.h; r++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::BLOCKED) { blockedNum++; }
+			if (ReadType(c, r) == CellType::BLOCKED) { blockedNum++; }
 		}
 		if (blockedNum == board.h - board.colLabels[c])
 		{
 			for (int r = 0; r < board.h; r++)
 			{
-				if (ReadType(IntVec(c, r)) == CellType::UNKNOWN)
+				if (ReadType(c, r) == CellType::UNKNOWN)
 				{
-					StrategyResult res = SetType(IntVec(c, r), CellType::RAIL);
+					StrategyResult res = SetType(c, r, CellType::RAIL);
 					if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 					applicable |= (res == StrategyResult::SUCCESS);
 				}
@@ -548,15 +548,15 @@ StrategyResult PuzzleSolver::PNSpaces()
 		blockedNum = 0;
 		for (int c = 0; c < board.w; c++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::BLOCKED) { blockedNum++; }
+			if (ReadType(c, r) == CellType::BLOCKED) { blockedNum++; }
 		}
 		if (blockedNum == board.w - board.rowLabels[r])
 		{
 			for (int c = 0; c < board.w; c++)
 			{
-				if (ReadType(IntVec(c, r)) == CellType::UNKNOWN)
+				if (ReadType(c, r) == CellType::UNKNOWN)
 				{
-					StrategyResult res = SetType(IntVec(c, r), CellType::RAIL);
+					StrategyResult res = SetType(c, r, CellType::RAIL);
 					if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 					applicable |= (res == StrategyResult::SUCCESS);
 				}
@@ -581,7 +581,7 @@ StrategyResult PuzzleSolver::BDeadEnd()
 			if (board[r][c].cellType == CellType::BLOCKED) { continue; }
 			if (StateCount(c, r, State::IMPOSSIBLE, State::IMPOSSIBLE) > 2)
 			{
-				StrategyResult res = SetType(IntVec(c, r), CellType::BLOCKED);
+				StrategyResult res = SetType(c, r, CellType::BLOCKED);
 				if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 				applicable |= (res == StrategyResult::SUCCESS);
 			}
@@ -604,7 +604,7 @@ StrategyResult PuzzleSolver::BParallelConnections()
 		int railNum = 0;
 		for (int r = 0; r < board.h; r++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::RAIL)
+			if (ReadType(c, r) == CellType::RAIL)
 			{
 				railNum++;
 			}
@@ -616,7 +616,7 @@ StrategyResult PuzzleSolver::BParallelConnections()
 			// Loop through rails in col (c, r)
 			for (int r = 0; r < board.h; r++)
 			{
-				if (ReadType(IntVec(c, r)) != CellType::RAIL) { continue; }
+				if (ReadType(c, r) != CellType::RAIL) { continue; }
 
 				// Count connections
 				if (StateCount(c, r, State::POSSIBLE, State::POSSIBLE) != 2) { continue; }
@@ -635,9 +635,9 @@ StrategyResult PuzzleSolver::BParallelConnections()
 				{
 					for (int rBlock = 0; rBlock < board.h; rBlock++)
 					{
-						if (abs(rBlock - r) > 1 && ReadType(IntVec(c, rBlock)) == CellType::UNKNOWN)
+						if (abs(rBlock - r) > 1 && ReadType(c, rBlock) == CellType::UNKNOWN)
 						{
-							StrategyResult res = SetType(IntVec(c, rBlock), CellType::BLOCKED);
+							StrategyResult res = SetType(c, rBlock, CellType::BLOCKED);
 							if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 							applicable |= (res == StrategyResult::SUCCESS);
 						}
@@ -652,7 +652,7 @@ StrategyResult PuzzleSolver::BParallelConnections()
 		int railNum = 0;
 		for (int c = 0; c < board.w; c++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::RAIL)
+			if (ReadType(c, r) == CellType::RAIL)
 			{
 				railNum++;
 			}
@@ -664,7 +664,7 @@ StrategyResult PuzzleSolver::BParallelConnections()
 			// Loop through rails in row (c, r)
 			for (int c = 0; c < board.w; c++)
 			{
-				if (ReadType(IntVec(c, r)) != CellType::RAIL) { continue; }
+				if (ReadType(c, r) != CellType::RAIL) { continue; }
 
 				// Count connections
 				if (StateCount(c, r, State::POSSIBLE, State::POSSIBLE) != 2) { continue; }
@@ -683,9 +683,9 @@ StrategyResult PuzzleSolver::BParallelConnections()
 				{
 					for (int cBlock = 0; cBlock < board.w; cBlock++)
 					{
-						if (abs(cBlock - c) > 1 && ReadType(IntVec(cBlock, r)) == CellType::UNKNOWN)
+						if (abs(cBlock - c) > 1 && ReadType(cBlock, r) == CellType::UNKNOWN)
 						{
-							StrategyResult res = SetType(IntVec(cBlock, r), CellType::BLOCKED);
+							StrategyResult res = SetType(cBlock, r, CellType::BLOCKED);
 							if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 							applicable |= (res == StrategyResult::SUCCESS);
 						}
@@ -710,7 +710,7 @@ StrategyResult PuzzleSolver::BImpossibleSide()
 		railNum = 0;
 		for (int r = 0; r < board.h; r++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::RAIL)
+			if (ReadType(c, r) == CellType::RAIL)
 			{
 				railNum++;
 			}
@@ -719,21 +719,21 @@ StrategyResult PuzzleSolver::BImpossibleSide()
 		{
 			for (int r = 0; r < board.h; r++)
 			{
-				if (ReadType(IntVec(c, r)) == CellType::RAIL) { continue; }
+				if (ReadType(c, r) == CellType::RAIL) { continue; }
 				bool sideBlocked = false;
-				if (ReadTrack(IntVec(c + 1, r), Direction::LEFT) == State::IMPOSSIBLE) { sideBlocked = true; }
-				if (ReadTrack(IntVec(c - 1, r), Direction::RIGHT) == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(c + 1, r, Direction::LEFT) == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(c - 1, r, Direction::RIGHT) == State::IMPOSSIBLE) { sideBlocked = true; }
 
 
 				if (sideBlocked)
 				{
 					bool nextToRail = false;
-					if (ReadType(IntVec(c, r - 1)) == CellType::RAIL && ReadTrack(IntVec(c, r - 1), Direction::DOWN) != State::IMPOSSIBLE) { nextToRail = true; }
-					if (ReadType(IntVec(c, r + 1)) == CellType::RAIL && ReadTrack(IntVec(c, r + 1), Direction::UP) != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(c, r - 1) == CellType::RAIL && ReadTrack(c, r - 1, Direction::DOWN) != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(c, r + 1) == CellType::RAIL && ReadTrack(c, r + 1, Direction::UP) != State::IMPOSSIBLE) { nextToRail = true; }
 
 					if (!nextToRail)
 					{
-						StrategyResult res = SetType(IntVec(c, r), CellType::BLOCKED);
+						StrategyResult res = SetType(c, r, CellType::BLOCKED);
 						if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 						applicable |= (res == StrategyResult::SUCCESS);
 					}
@@ -746,7 +746,7 @@ StrategyResult PuzzleSolver::BImpossibleSide()
 		railNum = 0;
 		for (int c = 0; c < board.w; c++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::RAIL)
+			if (ReadType(c, r) == CellType::RAIL)
 			{
 				railNum++;
 			}
@@ -755,21 +755,21 @@ StrategyResult PuzzleSolver::BImpossibleSide()
 		{
 			for (int c = 0; c < board.w; c++)
 			{
-				if (ReadType(IntVec(c, r)) == CellType::RAIL) { continue; }
+				if (ReadType(c, r) == CellType::RAIL) { continue; }
 				bool sideBlocked = false;
-				if (ReadTrack(IntVec(c, r - 1), Direction::DOWN) == State::IMPOSSIBLE) { sideBlocked = true; }
-				if (ReadTrack(IntVec(c, r + 1), Direction::UP) == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(c, r - 1, Direction::DOWN) == State::IMPOSSIBLE) { sideBlocked = true; }
+				if (ReadTrack(c, r + 1, Direction::UP) == State::IMPOSSIBLE) { sideBlocked = true; }
 
 
 				if (sideBlocked)
 				{
 					bool nextToRail = false;
-					if (ReadType(IntVec(c - 1, r)) == CellType::RAIL && ReadTrack(IntVec(c - 1, r), Direction::RIGHT) != State::IMPOSSIBLE) { nextToRail = true; }
-					if (ReadType(IntVec(c + 1, r)) == CellType::RAIL && ReadTrack(IntVec(c + 1, r), Direction::LEFT) != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(c - 1, r) == CellType::RAIL && ReadTrack(c - 1, r, Direction::RIGHT) != State::IMPOSSIBLE) { nextToRail = true; }
+					if (ReadType(c + 1, r) == CellType::RAIL && ReadTrack(c + 1, r, Direction::LEFT) != State::IMPOSSIBLE) { nextToRail = true; }
 
 					if (!nextToRail)
 					{
-						StrategyResult res = SetType(IntVec(c, r), CellType::BLOCKED);
+						StrategyResult res = SetType(c, r, CellType::BLOCKED);
 						if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 						applicable |= (res == StrategyResult::SUCCESS);
 					}
@@ -794,7 +794,7 @@ StrategyResult PuzzleSolver::BDoubleImpossibleSide()
 		railNum = 0;
 		for (int r = 0; r < board.h; r++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::RAIL)
+			if (ReadType(c, r) == CellType::RAIL)
 			{
 				railNum++;
 			}
@@ -803,20 +803,20 @@ StrategyResult PuzzleSolver::BDoubleImpossibleSide()
 		{
 			for (int r = 0; r < board.h; r++)
 			{
-				if (ReadType(IntVec(c, r)) == CellType::RAIL) { continue; }
-				bool sideBlocked = ReadTrack(IntVec(c + 1, r), Direction::LEFT) == State::IMPOSSIBLE
-					&& ReadTrack(IntVec(c - 1, r), Direction::RIGHT) == State::IMPOSSIBLE;
+				if (ReadType(c, r) == CellType::RAIL) { continue; }
+				bool sideBlocked = ReadTrack(c + 1, r, Direction::LEFT) == State::IMPOSSIBLE
+					&& ReadTrack(c - 1, r, Direction::RIGHT) == State::IMPOSSIBLE;
 
 
 				if (sideBlocked)
 				{
 					int nextToRail = 0;
-					if (ReadType(IntVec(c, r - 1)) == CellType::RAIL && ReadTrack(IntVec(c, r - 1), Direction::DOWN) != State::IMPOSSIBLE) { nextToRail++; }
-					if (ReadType(IntVec(c, r + 1)) == CellType::RAIL && ReadTrack(IntVec(c, r + 1), Direction::UP) != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(c, r - 1) == CellType::RAIL && ReadTrack(c, r - 1, Direction::DOWN) != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(c, r + 1) == CellType::RAIL && ReadTrack(c, r + 1, Direction::UP) != State::IMPOSSIBLE) { nextToRail++; }
 
 					if ((railNum == board.colLabels[c] - 2 && nextToRail == 0) || (railNum == board.colLabels[c] - 1 && nextToRail <= 1))
 					{
-						StrategyResult res = SetType(IntVec(c, r), CellType::BLOCKED);
+						StrategyResult res = SetType(c, r, CellType::BLOCKED);
 						if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 						applicable |= (res == StrategyResult::SUCCESS);
 					}
@@ -829,7 +829,7 @@ StrategyResult PuzzleSolver::BDoubleImpossibleSide()
 		railNum = 0;
 		for (int c = 0; c < board.w; c++)
 		{
-			if (ReadType(IntVec(c, r)) == CellType::RAIL)
+			if (ReadType(c, r) == CellType::RAIL)
 			{
 				railNum++;
 			}
@@ -838,19 +838,19 @@ StrategyResult PuzzleSolver::BDoubleImpossibleSide()
 		{
 			for (int c = 0; c < board.w; c++)
 			{
-				if (ReadType(IntVec(c, r)) == CellType::RAIL) { continue; }
-				bool sideBlocked = ReadTrack(IntVec(c, r - 1), Direction::DOWN) == State::IMPOSSIBLE
-					&& ReadTrack(IntVec(c, r + 1), Direction::UP) == State::IMPOSSIBLE;
+				if (ReadType(c, r) == CellType::RAIL) { continue; }
+				bool sideBlocked = ReadTrack(c, r - 1, Direction::DOWN) == State::IMPOSSIBLE
+					&& ReadTrack(c, r + 1, Direction::UP) == State::IMPOSSIBLE;
 
 				if (sideBlocked)
 				{
 					int nextToRail = 0;
-					if (ReadType(IntVec(c - 1, r)) == CellType::RAIL && ReadTrack(IntVec(c - 1, r), Direction::RIGHT) != State::IMPOSSIBLE) { nextToRail++; }
-					if (ReadType(IntVec(c + 1, r)) == CellType::RAIL && ReadTrack(IntVec(c + 1, r), Direction::LEFT) != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(c - 1, r) == CellType::RAIL && ReadTrack(c - 1, r, Direction::RIGHT) != State::IMPOSSIBLE) { nextToRail++; }
+					if (ReadType(c + 1, r) == CellType::RAIL && ReadTrack(c + 1, r, Direction::LEFT) != State::IMPOSSIBLE) { nextToRail++; }
 
 					if ((railNum == board.rowLabels[r] - 2 && nextToRail == 0) || (railNum == board.rowLabels[r] - 1 && nextToRail <= 1))
 					{
-						StrategyResult res = SetType(IntVec(c, r), CellType::BLOCKED);
+						StrategyResult res = SetType(c, r, CellType::BLOCKED);
 						if (res == StrategyResult::FOUND_FLAW) return StrategyResult::FOUND_FLAW;
 						applicable |= (res == StrategyResult::SUCCESS);
 					}
@@ -876,7 +876,7 @@ StrategyResult PuzzleSolver::BClosedLoop()
 	{
 		for (int c = 0; c < board.w; c++)
 		{
-			startPos = IntVec(c, r);
+			startPos = { c, r };
 			currentPos = startPos;
 			if (ReadType(startPos) != CellType::RAIL) { continue; }
 			if (StateCount(startPos, State::CERTAIN, State::GIVEN) != 1) { continue; }
