@@ -450,7 +450,7 @@ void Canvas::OnKeyPressed(wxKeyEvent& evt)
 		solutionNumText << solutionNum;
 		new wxStaticText(dlg, wxID_ANY, solutionNumText);
 
-		if (dlg->ShowModal());
+		dlg->ShowModal();
 	}
 	else
 	{

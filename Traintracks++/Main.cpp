@@ -7,19 +7,19 @@ wxBEGIN_EVENT_TABLE(Main, wxFrame)
 	EVT_MENU(10004, OnMenuExit)
 wxEND_EVENT_TABLE()
 
-Main::Main() : wxMDIParentFrame(nullptr, wxID_ANY, "Traintracks Solver", wxPoint(30, 30), wxSize(800, 600))
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Traintracks Solver", wxPoint(30, 30), wxSize(800, 600))
 {
 	menuBar = new wxMenuBar();
 
 	SetMenuBar(menuBar);
 
-	wxMenu* menuFile = new wxMenu();
-	menuFile->Append(10001, "New\tCtrl + N");
-	menuFile->Append(10002, "Open\tCtrl + O");
-	menuFile->Append(10003, "Save\tCtrl + S");
-	menuFile->Append(10004, "Exit\tAlt + F4");
+	wxMenu* fileMenu = new wxMenu();
+	fileMenu->Append(10001, "New\tCtrl + N");
+	fileMenu->Append(10002, "Open\tCtrl + O");
+	fileMenu->Append(10003, "Save\tCtrl + S");
+	fileMenu->Append(10004, "Exit\tAlt + F4");
 
-	menuBar->Append(menuFile, "File");
+	menuBar->Append(fileMenu, "File");
 
 	canvas = new Canvas(this);
 
@@ -29,7 +29,7 @@ Main::Main() : wxMDIParentFrame(nullptr, wxID_ANY, "Traintracks Solver", wxPoint
 	entries[2].Set(wxACCEL_CTRL, (int)'S', 10003);
 	entries[3].Set(wxACCEL_ALT, WXK_F4, 10004);
 	wxAcceleratorTable accel(4, entries);
-	this->SetAcceleratorTable(accel);
+	SetAcceleratorTable(accel);
 }
 
 Main::~Main()

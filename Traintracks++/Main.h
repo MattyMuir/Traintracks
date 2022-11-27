@@ -2,7 +2,7 @@
 #include <wx/wx.h>
 #include "Canvas.h"
 
-class Main : public wxMDIParentFrame
+class Main : public wxFrame
 {
 public:
 	Main();
